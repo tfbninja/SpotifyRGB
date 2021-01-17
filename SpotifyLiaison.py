@@ -61,7 +61,13 @@ currentSong = NowPlaying.NowPlaying(sp)
 delta = time.time() - msStart
 last = 0
 
-ser = serial.Serial('COM3', 74880)
+devices = [port.device for port in list_ports.comports()]
+ports = [port for port in devices if port in ['/dev/ttyACM0','/dev/ttyUSB0']]
+if len(ports) != 1:
+    raise Exception('cannot identify port to use')
+port = ports[0]
+
+ser = serial.Serial(port, 74880)
 
 c = Color("blue")
 
@@ -85,8 +91,15 @@ while(True):
             currentSong.reSync()
 
     lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-
-    ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
+    
+    successful = False
+    while not successful:
+        try:
+            ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
+            successful = True
+        except:
+            currentSong.reSync()
+            break
 
     c.luminance = ratio + 0.05
 
