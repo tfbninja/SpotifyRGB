@@ -81,7 +81,7 @@ def randomishColor(): # in my highly uneducated opinion, this tends to generate 
 
 syncPeriod = 500
 patterns = ['color_swirl', 'disco', 'beat_swirl', 'experiment_no_2', 'rand_color_swirl', 'disco_but_with_different_colors', 'super_fast_disco_and_also_random_colors_because_i_said', 'gentle_pulse']
-discoesPerSong = 1
+discoesPerSong = 2
 discoesDone = 0
 currentPattern = random.choice(patterns)
 currentHue = 0
