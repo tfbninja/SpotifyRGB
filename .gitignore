@@ -2,3 +2,5 @@
 credentials.py
 __pycache__/credentials.cpython-37.pyc
 credentials.pyc
+.cache
+__pycache__/NowPlaying.cpython-37.pyc

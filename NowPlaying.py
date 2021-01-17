@@ -15,7 +15,9 @@ class NowPlaying:
         self.isPlaying = self.results['is_playing']
         
         self.analysis = self.sp.audio_analysis(self.uri)
+        self.sectionlist = self.analysis['sections']
         self.beatlist = self.analysis['beats']
+        self.tatumlist = self.analysis['tatums']
         
         self.features = self.sp.audio_features(self.uri)
         self.tempo = self.features[0]['tempo']
@@ -28,9 +30,15 @@ class NowPlaying:
         self.progress_ms = tempResults['progress_ms']
         self.msStart = time.time()
         self.isPlaying = tempResults['is_playing']
-        
+
+    def getSectionlist(self):
+        return self.sectionlist
+    
     def getBeatlist(self):
         return self.beatlist
+
+    def getTatumlist(self):
+        return self.tatumlist
 
     def getPosInSongMillis(self):
         deltaMS = (time.time() - self.msStart) * 1000
