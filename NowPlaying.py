@@ -23,13 +23,19 @@ class NowPlaying:
         self.tempo = self.features[0]['tempo']
 
     def reSync(self):
-        tempResults = self.sp.current_user_playing_track()
-        if self.uri != tempResults['item']['uri']:
-            self.syncSongData()
-            return()
-        self.progress_ms = tempResults['progress_ms']
-        self.msStart = time.time()
-        self.isPlaying = tempResults['is_playing']
+        successful = False
+        while not successful:
+            try:
+                tempResults = self.sp.current_user_playing_track()
+                if self.uri != tempResults['item']['uri']:
+                    self.syncSongData()
+                    return()
+                self.progress_ms = tempResults['progress_ms']
+                self.msStart = time.time()
+                self.isPlaying = tempResults['is_playing']
+                successful = True
+            except:
+                reSync()
 
     def getSectionlist(self):
         return self.sectionlist
