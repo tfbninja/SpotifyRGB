@@ -6,36 +6,47 @@ class NowPlaying:
 
     def syncSongData(self):
         self.results = self.sp.current_user_playing_track()
-        self.progress_ms = self.results['progress_ms']
-        self.msStart = time.time()
-        
-        self.name = self.results['item']['name']
-        self.uri = self.results['item']['uri']
-        self.songLength = self.results['item']['duration_ms']
-        self.isPlaying = self.results['is_playing']
-        
-        self.analysis = self.sp.audio_analysis(self.uri)
-        self.sectionlist = self.analysis['sections']
-        self.beatlist = self.analysis['beats']
-        self.tatumlist = self.analysis['tatums']
-        
-        self.features = self.sp.audio_features(self.uri)
-        self.tempo = self.features[0]['tempo']
+        try:
+            self.isPlaying = self.results['is_playing']
+            if self.isPlaying:
+                self.progress_ms = self.results['progress_ms']
+                self.msStart = time.time()
+                
+                self.name = self.results['item']['name']
+                self.uri = self.results['item']['uri']
+                self.songLength = self.results['item']['duration_ms']
+                
+                
+                self.analysis = self.sp.audio_analysis(self.uri)
+                self.sectionlist = self.analysis['sections']
+                self.beatlist = self.analysis['beats']
+                self.tatumlist = self.analysis['tatums']
+                
+                self.features = self.sp.audio_features(self.uri)
+                self.tempo = self.features[0]['tempo']
+        except:
+            print("song probably not playing")
 
     def reSync(self):
         successful = False
         while not successful:
             try:
                 tempResults = self.sp.current_user_playing_track()
-                if self.uri != tempResults['item']['uri']:
-                    self.syncSongData()
-                    return()
-                self.progress_ms = tempResults['progress_ms']
-                self.msStart = time.time()
-                self.isPlaying = tempResults['is_playing']
-                successful = True
+                try:
+                    self.isPlaying = tempResults['is_playing']
+                    if self.isPlaying:
+                        successful = True
+                        if self.uri != tempResults['item']['uri']:
+                            self.syncSongData()
+                            return()
+                        self.progress_ms = tempResults['progress_ms']
+                        self.msStart = time.time()
+                        self.isPlaying = tempResults['is_playing']
+                        successful = True
+                except:
+                    print("song probably not playing")
             except:
-                reSync()
+                self.reSync()
 
     def getSectionlist(self):
         return self.sectionlist
@@ -60,5 +71,8 @@ class NowPlaying:
         return self.songLength
 
     def getIsPlaying(self):
-        return self.isPlaying
+        try:
+            return self.isPlaying
+        except:
+            return False
 

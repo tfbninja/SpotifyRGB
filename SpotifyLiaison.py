@@ -81,7 +81,7 @@ def randomishColor(): # in my highly uneducated opinion, this tends to generate 
 
 syncPeriod = 500
 patterns = ['color_swirl', 'disco', 'beat_swirl', 'experiment_no_2', 'rand_color_swirl', 'disco_but_with_different_colors', 'super_fast_disco_and_also_random_colors_because_i_said', 'gentle_pulse']
-discoesPerSong = 2
+discoesPerSong = 1
 discoesDone = 0
 currentPattern = random.choice(patterns)
 currentHue = 0
@@ -307,15 +307,22 @@ while(True):
                 c.luminance = ratio
         except:
             currentSong.reSync()
+        try:
+            out = '(' + str(floor(c.red * 255)) + ',' + str(floor(c.green * 255)) + ',' + str(floor(c.blue * 255)) + ')'
+
+            print("name: " + currentSong.getSongName() + "  is playing: " + str(currentSong.getIsPlaying()) + "  pattern:" + str(currentPattern) + "   timeTillSectionChange:" + str(getTimeToNextSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())) + "   sections:" + str(len(currentSong.getSectionlist())) + "   " + out + "   " + str(loopIndice))
+        except:
+            currentSong.reSync()
     else:
         c.hue += 0.0001
-        c.saturation = 1
+        print(c)
     try:
         out = '(' + str(floor(c.red * 255)) + ',' + str(floor(c.green * 255)) + ',' + str(floor(c.blue * 255)) + ')'
 
-        print("name: " + currentSong.getSongName() + "  is playing: " + str(currentSong.getIsPlaying()) + "  pattern:" + str(currentPattern) + "   timeTillSectionChange:" + str(getTimeToNextSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())) + "   sections:" + str(len(currentSong.getSectionlist())) + "   " + out + "   " + str(loopIndice))
+        #print("name: " + currentSong.getSongName() + "  is playing: " + str(currentSong.getIsPlaying()) + "  pattern:" + str(currentPattern) + "   timeTillSectionChange:" + str(getTimeToNextSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())) + "   sections:" + str(len(currentSong.getSectionlist())) + "   " + out + "   " + str(loopIndice))
     except:
-        currentSong.reSync()
+        #currentSong.reSync()
+        pass
 
     ser.write(bytes(out, 'utf-8'))
 
