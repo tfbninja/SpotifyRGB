@@ -122,196 +122,200 @@ while(True):
     loopIndice += 1
 
     if currentSong.getIsPlaying():
-        if currentSong.getPosInSongMillis() >= currentSong.getSongLengthMillis() - 5:
-            currentSong.reSync()
-        successful = False
         try:
-            if getSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist()) > lastSection:
-                lastSection = getSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())
-                refreshRandoms()
-                lastPattern = currentPattern
-                canBeDisco = discoesDone < discoesPerSong
-                while lastPattern == currentPattern or ("disco" in currentPattern and (not canBeDisco)):
-                    currentPattern = random.choice(patterns)
-                if "disco" in currentPattern:
-                    discoesDone += 1
+            if currentSong.getPosInSongMillis() >= currentSong.getSongLengthMillis() - 5:
+                currentSong.reSync()
+            successful = False
+            try:
+                if getSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist()) > lastSection:
+                    lastSection = getSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())
+                    refreshRandoms()
+                    lastPattern = currentPattern
+                    canBeDisco = discoesDone < discoesPerSong
+                    while lastPattern == currentPattern or ("disco" in currentPattern and (not canBeDisco)):
+                        currentPattern = random.choice(patterns)
+                    if "disco" in currentPattern:
+                        discoesDone += 1
+            except:
+                currentSong.reSync()
+                    
+            if currentPattern == 'color_swirl':
+                if c.hue < 0.998:
+                    c.hue = c.hue + 0.0005
+                else:
+                    c.hue = 0
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                
+                successful = False
+                while not successful:
+                    try:
+                        ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
+                        successful = True
+                    except:
+                        currentSong.reSync()
+                        break
+
+                c.luminance = ratio + 0.05
+            elif currentPattern == 'disco':
+                hues = [Color("Red"), Color("Blue"), Color("White")]
+                
+                if loopIndice % 200 == 0:
+                    currentHue += 1
+                    if currentHue > len(hues) - 1:
+                        currentHue = 0
+                c = hues[currentHue]
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                if nextBeat < 0.02:
+                    c.red *= 1
+                    c.green *= 1
+                    c.blue *= 1
+                else:
+                    c.red *= 0.01
+                    c.green *= 0.01
+                    c.blue *= 0.01
+            elif currentPattern == 'beat_swirl': # don't ask me what this pattern calculates, all i know is that the color change is somewhat in time with the beat \_:)_/
+                oneAndAHalfBeatTime = (getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 4) - getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 1)) / 2 * 1000 # Calculates time of one and a half beats in millis
+                ratio = (loopLength) / oneAndAHalfBeatTime # calculates ratio of one loop time to one and a half beat time, all in millis
+                currentPolarColor.hue += (ratio * 0.5) % 1
+                c = currentPolarColor
+            elif currentPattern == 'experiment_no_2':
+                beatTime = getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 2) - getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 1) # time between next beat and beat after that
+                ratio = (loopLength / (beatTime * 1000))
+                if exp_no_2_color.hue >= exp_no_2_color_bounds[1].hue:
+                    exp_no_2_color.hue -= ratio * (exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)
+                else:
+                    exp_no_2_color.hue += ratio * (exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)
+                c = exp_no_2_color
+            elif currentPattern == 'rand_color_swirl': # rand color swirl
+                if c.hue < 0.998:
+                    c.hue = c.hue + random.randint(-1, 5) / 10000
+                else:
+                    c.hue = 0
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                
+                successful = False
+                while not successful:
+                    try:
+                        ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
+                        successful = True
+                    except:
+                        currentSong.reSync()
+                        break
+
+                c.luminance = ratio + 0.05
+            elif currentPattern == 'disco_but_with_different_colors': # its like the disco function but not just red white or blue
+                discoColorHues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
+                
+                if loopIndice % 200 == 0:
+                    currentHue += 1
+                    if currentHue > len(discoColorHues) - 1:
+                        currentHue = 0
+                c = discoColorHues[currentHue]
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                if nextBeat < 0.02:
+                    c.red *= 1
+                    c.green *= 1
+                    c.blue *= 1
+                else:
+                    c.red *= 0.01
+                    c.green *= 0.01
+                    c.blue *= 0.01
+            elif currentPattern == 'super_fast_disco_and_also_random_colors_because_i_said': # its like the disco function but not just red white or blue
+                hues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
+                
+                if loopIndice % 200 == 0:
+                    currentHue += 1
+                    if currentHue > len(hues) - 1:
+                        currentHue = 0
+                c = hues[currentHue]
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                if nextBeat < 0.02:
+                    c.red *= 1
+                    c.green *= 1
+                    c.blue *= 1
+                else:
+                    c.red *= 0.01
+                    c.green *= 0.01
+                    c.blue *= 0.01
+            elif currentPattern == 'gentle_pulse':
+                if c.hue < 0.998:
+                    c.hue = c.hue + 0.0005
+                else:
+                    c.hue = 0
+
+                successful = False
+                while not successful:
+                    try:
+                        nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                        successful = True
+                    except IndexError:
+                        currentSong.reSync()
+
+                lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
+                
+                successful = False
+                while not successful:
+                    try:
+                        ratio = (0.2 * ((nextBeat) / (nextBeat + lastBeat))) ** 0.8
+                        successful = True
+                    except:
+                        currentSong.reSync()
+                        break
+
+                c.luminance = ratio
         except:
             currentSong.reSync()
-                
-        if currentPattern == 'color_swirl':
-            if c.hue < 0.998:
-                c.hue = c.hue + 0.0005
-            else:
-                c.hue = 0
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-            
-            successful = False
-            while not successful:
-                try:
-                    ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
-                    successful = True
-                except:
-                    currentSong.reSync()
-                    break
-
-            c.luminance = ratio + 0.05
-        elif currentPattern == 'disco':
-            hues = [Color("Red"), Color("Blue"), Color("White")]
-            
-            if loopIndice % 200 == 0:
-                currentHue += 1
-                if currentHue > len(hues) - 1:
-                    currentHue = 0
-            c = hues[currentHue]
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            if nextBeat < 0.02:
-                c.red *= 1
-                c.green *= 1
-                c.blue *= 1
-            else:
-                c.red *= 0.01
-                c.green *= 0.01
-                c.blue *= 0.01
-        elif currentPattern == 'beat_swirl': # don't ask me what this pattern calculates, all i know is that the color change is somewhat in time with the beat \_:)_/
-            oneAndAHalfBeatTime = (getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 4) - getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 1)) / 2 * 1000 # Calculates time of one and a half beats in millis
-            ratio = (loopLength) / oneAndAHalfBeatTime # calculates ratio of one loop time to one and a half beat time, all in millis
-            currentPolarColor.hue += (ratio * 0.5) % 1
-            c = currentPolarColor
-        elif currentPattern == 'experiment_no_2':
-            beatTime = getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 2) - getTimeToNthBeat(currentSong.getPosInSongMillis(), currentSong.getTatumlist(), 1) # time between next beat and beat after that
-            ratio = (loopLength / (beatTime * 1000))
-            if exp_no_2_color.hue >= exp_no_2_color_bounds[1].hue:
-                exp_no_2_color.hue -= ratio * (exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)
-            else:
-                exp_no_2_color.hue += ratio * (exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)
-            c = exp_no_2_color
-        elif currentPattern == 'rand_color_swirl': # rand color swirl
-            if c.hue < 0.998:
-                c.hue = c.hue + random.randint(-1, 5) / 10000
-            else:
-                c.hue = 0
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-            
-            successful = False
-            while not successful:
-                try:
-                    ratio =  (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
-                    successful = True
-                except:
-                    currentSong.reSync()
-                    break
-
-            c.luminance = ratio + 0.05
-        elif currentPattern == 'disco_but_with_different_colors': # its like the disco function but not just red white or blue
-            discoColorHues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
-            
-            if loopIndice % 200 == 0:
-                currentHue += 1
-                if currentHue > len(discoColorHues) - 1:
-                    currentHue = 0
-            c = discoColorHues[currentHue]
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            if nextBeat < 0.02:
-                c.red *= 1
-                c.green *= 1
-                c.blue *= 1
-            else:
-                c.red *= 0.01
-                c.green *= 0.01
-                c.blue *= 0.01
-        elif currentPattern == 'super_fast_disco_and_also_random_colors_because_i_said': # its like the disco function but not just red white or blue
-            hues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
-            
-            if loopIndice % 200 == 0:
-                currentHue += 1
-                if currentHue > len(hues) - 1:
-                    currentHue = 0
-            c = hues[currentHue]
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextTatum(currentSong.getPosInSongMillis(), currentSong.getTatumlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            if nextBeat < 0.02:
-                c.red *= 1
-                c.green *= 1
-                c.blue *= 1
-            else:
-                c.red *= 0.01
-                c.green *= 0.01
-                c.blue *= 0.01
-        elif currentPattern == 'gentle_pulse':
-            if c.hue < 0.998:
-                c.hue = c.hue + 0.0005
-            else:
-                c.hue = 0
-
-            successful = False
-            while not successful:
-                try:
-                    nextBeat = getTimeToNextBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-                    successful = True
-                except IndexError:
-                    currentSong.reSync()
-
-            lastBeat = getTimeSinceBeat(currentSong.getPosInSongMillis(), currentSong.getBeatlist())
-            
-            successful = False
-            while not successful:
-                try:
-                    ratio = (0.2 * ((nextBeat) / (nextBeat + lastBeat))) ** 0.8
-                    successful = True
-                except:
-                    currentSong.reSync()
-                    break
-
-            c.luminance = ratio
-                
     else:
         c.hue += 0.0001
         c.saturation = 1
+    try:
+        out = '(' + str(floor(c.red * 255)) + ',' + str(floor(c.green * 255)) + ',' + str(floor(c.blue * 255)) + ')'
 
-    out = '(' + str(floor(c.red * 255)) + ',' + str(floor(c.green * 255)) + ',' + str(floor(c.blue * 255)) + ')'
-
-    print("name: " + currentSong.getSongName() + "  is playing: " + str(currentSong.getIsPlaying()) + "  pattern:" + str(currentPattern) + "   timeTillSectionChange:" + str(getTimeToNextSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())) + "   sections:" + str(len(currentSong.getSectionlist())) + "   " + out + "   " + str(loopIndice))
+        print("name: " + currentSong.getSongName() + "  is playing: " + str(currentSong.getIsPlaying()) + "  pattern:" + str(currentPattern) + "   timeTillSectionChange:" + str(getTimeToNextSection(currentSong.getPosInSongMillis(), currentSong.getSectionlist())) + "   sections:" + str(len(currentSong.getSectionlist())) + "   " + out + "   " + str(loopIndice))
+    except:
+        currentSong.reSync()
 
     ser.write(bytes(out, 'utf-8'))
 
