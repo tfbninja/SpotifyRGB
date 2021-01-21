@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="362d5324-ba6b-4232-9a22-7d2465dd1e92" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SpotifyLiaison.py" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifyLiaison.py" afterDir="false" />
-    </list>
+    <list default="true" id="362d5324-ba6b-4232-9a22-7d2465dd1e92" name="Default Changelist" comment="formatting (yay PyCharm!)" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,6 +16,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="hiddenUrls">
+      <set>
+        <option value="https://github.com/tfbninja/SpotifyRGB" />
+      </set>
+    </option>
   </component>
   <component name="ProjectId" id="1nO2MTDXvk7Jd22y9ggmhZKLhwY" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -44,6 +49,28 @@
       <option name="presentableId" value="Default" />
       <updated>1611246772414</updated>
     </task>
+    <task id="LOCAL-00001">
+      <created>1611249460171</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1611249460171</updated>
+    </task>
+    <task id="LOCAL-00002" summary="formatting (yay PyCharm!)">
+      <created>1611249483583</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1611249483583</updated>
+    </task>
+    <task id="LOCAL-00003" summary="formatting (yay PyCharm!)">
+      <created>1611249562134</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1611249562134</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -56,5 +83,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="formatting (yay PyCharm!)" />
+    <option name="LAST_COMMIT_MESSAGE" value="formatting (yay PyCharm!)" />
   </component>
 </project>
