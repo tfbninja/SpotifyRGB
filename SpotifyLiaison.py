@@ -1,3 +1,4 @@
+from patterns2 import *
 import colorsys  # see colour import for why i need to import TWO color libraries
 import random
 import time
@@ -5,128 +6,22 @@ from math import *
 
 import serial.tools.list_ports
 import spotipy
-from colour import Color  # WHY NO HSV SUPPORT C'MON
+from colour import Color  # WHY NO HSV SUPPORT C'MON (literal rage but at the same time i get it)
 from spotipy.oauth2 import SpotifyOAuth
 
 import NowPlaying
 from credentials import *
 
-def getTimeToNextSection(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	sectionlist = currentSong.getSectionlist()
-	time = millis / 1000
-	for sectionIndice in range(len(sectionlist) - 2, 0, -1):
-		if time > sectionlist[sectionIndice]['start']:
-			return sectionlist[sectionIndice + 1]['start'] - time
-	return None
-
-def getTimeSinceSection(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	sectionlist = currentSong.getSectionlist()
-	time = millis / 1000
-	for sectionIndice in range(len(sectionlist) - 2, 0, -1):
-		if time > sectionlist[sectionIndice]['start']:
-			return time - sectionlist[sectionIndice]['start']
-	return None
-
-def getSection(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	sectionlist = currentSong.getSectionlist()
-	time = millis / 1000
-	for sectionIndice in range(len(sectionlist) - 2, 0, -1):
-		if time > sectionlist[sectionIndice]['start']:
-			return sectionIndice
-	return None
-
-def getTimeToNextBeat(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	beatlist = currentSong.getBeatlist()
-	time = millis / 1000
-	for beatIndice in range(len(beatlist) - 2, 0, -1):
-		if time > beatlist[beatIndice]['start']:
-			return beatlist[beatIndice + 1]['start'] - time
-	return None
-
-def getTimeToNthBeat(currentSong, n):
-	millis = currentSong.getPosInSongMillis()
-	beatlist = currentSong.getBeatlist()
-	time = millis / 1000
-	for beatIndice in range(len(beatlist) - 2, 0, -1):
-		if time > beatlist[beatIndice]['start']:
-			return beatlist[beatIndice + n]['start'] - time
-	return None
-
-def getTimeSinceBeat(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	beatlist = currentSong.getBeatlist()
-	time = millis / 1000
-	for beatIndice in range(len(beatlist) - 2, 0, -1):
-		if time > beatlist[beatIndice]['start']:
-			return time - beatlist[beatIndice]['start']
-	return None
-
-def getBeat(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	beatlist = currentSong.getBeatlist()
-	time = millis / 1000
-	if millis > currentSong.getSongLengthMillis() / 2:
-		for beatIndice in range(len(beatlist) - 2, 0, -1):
-			if time > beatlist[beatIndice]['start']:
-				return beatIndice
-	else:
-		for beatIndice in range(0, len(beatlist) - 2):
-			if time < beatlist[beatIndice]['start']:
-				return beatIndice - 1
-	return None
-
-def getTimeToNextTatum(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	tatumlist = currentSong.getTatumlist()
-	time = millis / 1000
-	for tatumIndice in range(len(tatumlist) - 2, 0, -1):
-		if time > tatumlist[tatumIndice]['start']:
-			return tatumlist[tatumIndice + 1]['start'] - time
-	return None
-
-def getTimeToNthTatum(currentSong, n):
-	millis = currentSong.getPosInSongMillis()
-	tatumlist = currentSong.getTatumlist()
-	time = millis / 1000
-	for tatumIndice in range(len(tatumlist) - 2, 0, -1):
-		if time > tatumlist[tatumIndice]['start']:
-			return tatumlist[tatumIndice + n]['start'] - time
-	return None
-
-def getTimeSinceTatum(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	tatumlist = currentSong.getTatumlist()
-	time = millis / 1000
-	for tatumIndice in range(len(tatumlist) - 2, 0, -1):
-		if time > tatumlist[tatumIndice]['start']:
-			return time - tatumlist[tatumIndice]['start']
-	return None
-
-def getTatum(currentSong):
-	millis = currentSong.getPosInSongMillis()
-	tatumlist = currentSong.getTatumlist()
-	time = millis / 1000
-	if millis > currentSong.getSongLengthMillis() / 2:
-		for tatumIndice in range(len(tatumlist) - 2, 0, -1):
-			if time > tatumlist[tatumIndice]['start']:
-				return tatumIndice
-	else:
-		for tatumIndice in range(0, len(tatumlist) - 2):
-			if time < tatumlist[tatumIndice]['start']:
-				return tatumIndice - 1
-	return None
-
+"""
 def refreshRandoms():  # re-does all the random components
 	fastRandomDiscoColors = [randomishColor(), randomishColor(), randomishColor(), randomishColor()]
 	# print("fast random disco colors: " + str(fastRandomDiscoColors))
 
 	randMultiplier = float(random.randint(10, 100)) / 100
 	randExponentiator = float(random.randint(10, 100)) / 100
+
 	# print("randmult: " + str(randMultiplier) + " randExp: " + str(randExponentiator))
+"""
 
 def printDelta(start, message):
 	print(str(time.time() - start) + "   " + message)
@@ -143,20 +38,34 @@ def randomishColor():
 	outColor = Color(rgb=(randoms[0] / 256, randoms[1] / 256, randoms[2] / 256))
 	return outColor
 
+def randomishColorSeed(seed):
+	random_obj = random.random(seed)
+	total = random_obj.randint(0, 255 * 3)
+	random1 = random_obj.randint(0, min(255, total))
+	random2 = random_obj.randint(0, min(255, total - random1))
+	random3 = random_obj.randint(0, min(255, total - (random1 + random2)))
+	randoms = [float(random1), float(random2), float(random3)]
+	random_obj.shuffle(randoms)
+	outColor = Color(rgb=(randoms[0] / 256, randoms[1] / 256, randoms[2] / 256))
+	return outColor
+
+"""
 def resetVariablesBecauseSongChanged():
 	discoesDone = 0
 	lastDiscoBeat = 0
 	time_signature_last_tatum_no = 0
 	lastOscillationBeat = 0
+"""
 
+"""
 def nextPattern(currentSong, currentPattern):
 	successful = False
 	while not successful:
 		try:
 			canBeDisco = discoesDone < discoesPerSong and not getSection(
 				currentSong) == 0  # You don't want the lights doing too many disco patterns, so we make sure we
-			# haven't done more than the allowed amount, also you don't want a disco at the beginning of the song
-			# most likely
+		# haven't done more than the allowed amount, also you don't want a disco at the beginning of the song
+		# most likely
 
 		except IndexError as I:
 			currentSong.reSync()
@@ -176,6 +85,7 @@ def nextPattern(currentSong, currentPattern):
 	print("new pattern is " + str(patterns[newPattern]))
 	print("next section is in " + str(getTimeToNextSection(currentSong))[:5] + "s")
 	return newPattern
+"""
 
 def getValue(color):
 	val = colorsys.rgb_to_hsv(color.red, color.green, color.blue)[2]
@@ -190,29 +100,48 @@ def flushSerialBuffers():
 	ser.flushInput()
 	ser.flushOutput()
 
+def getDiscoBar():
+	return discoBar
+
+def getLoopLength():
+	return loopLength
+
+def printStatusToUser(currentSong, pattern_manager):
+	print("Now playing: " + currentSong.getName())
+	print("The current pattern is " + str(pattern_manager.getPatternName()))
+	print("next section is in " + str(currentSong.getSecondsToNextSection())[:5] + "s")
+
+	time_signature = currentSong.getTimeSignature()
+	print("Time signature: " + str(time_signature))
+
 # fair warning, I know that I'm using the term 'disco' wrong, it should be strobe, but by the time I wanted to change
 # it, it was too late
-patterns = ['color_swirl', 'disco', 'beat_swirl', 'experiment_no_2', 'rand_color_swirl',
-            'disco_but_with_different_colors', 'super_fast_disco_and_also_random_colors_because_i_said', 'gentle_pulse',
-            'time_signature_pulse', '2_color_oscillation']
+#patterns = ['color_swirl', 'red_white_blue_disco', 'beat_swirl', 'experiment_no_2', 'rand_color_swirl',
+#            'disco_but_with_different_colors', 'super_fast_disco_and_also_random_colors_because_i_said',
+#            'gentle_pulse', 'time_signature_pulse', '2_color_oscillation']
 
+"""
 nonDiscoPatterns = []  # this list will be a list of lists, where each sublist is a pattern, and it's corresponding
 # indice in patterns[]
 for i in range(len(patterns)):
 	if not ("disco" in patterns[i]):
 		nonDiscoPatterns.append([patterns[i], i])
+"""
 
 syncPeriod = 250
 loopIndiceResetPeriod = 2000
 discoesPerSong = 2
 discoesDone = 0
 currentPattern = 0
-print("The current pattern is " + str(patterns[currentPattern]))
 
+
+"""
 startingColor = Color("Red")
 # print(getValue(startingColor))
 # print(setValue(startingColor, 0.5))
 startingHueIncrement = 0.001
+
+pulseBaseline = 0.3  # how dark in value (HSV) a pulsing pattern should ever get
 
 discoBar = 0.050  # in seconds (50 millis)
 currentHue = 0
@@ -236,6 +165,7 @@ oscillation_colors = [Color('#34ebcf'), Color('#d66f1c')]
 lastOscillationBeat = 0
 oscillation_first_color = False
 color_ratio = 0
+"""
 
 loopLength = 0.001
 
@@ -246,14 +176,16 @@ sp = spotipy.Spotify(
 # The currentSong object stores all the cached data about the song, including the beatlist, time signature,
 # danceability, and so forth
 currentSong = NowPlaying.NowPlaying(sp)
-print("Now playing: " + currentSong.getSongName())
-print("next section is in " + str(getTimeToNextSection(currentSong))[:5] + "s")
+# add patterns from patterns folder somehow idk
+pattern_list = [] # FIXME
+pattern_manager = patternManager(currentSong, pattern_list, currentPattern, discoesPerSong, discoesDone) # FIXME too
+printStatusToUser(currentSong)
 
+"""
 # This re-calculates the random variables for the patterns that utilize randomness
 refreshRandoms()
+"""
 
-time_signature = currentSong.getTimeSignature()
-print("Time signature: " + str(time_signature))
 
 # This is an integer describing the section in the song that we last knew we were in, if the CURRENT section changes,
 # we know to change the pattern
@@ -282,7 +214,7 @@ while True:
 	# We time the loop length, necessary for at least one pattern
 	loopStart = time.time()
 
-	if currentSong.getIsPlaying():
+	if currentSong.isPlaying():
 		try:
 			# This checks if we're near the end of the song
 			if currentSong.getPosInSongMillis() >= currentSong.getSongLengthMillis() - 3005:  # 3000 for my crossfade level, -5 for caution
@@ -319,7 +251,6 @@ while True:
 					# please excuse my lack of knowledge of how to not repeat these numerous stupid try/except statments
 					try:
 						nextBeat = getTimeToNextBeat(currentSong)
-
 					except IndexError as I:
 						c.hue += startingHueIncrement
 						currentSong.reSync()
@@ -331,7 +262,6 @@ while True:
 
 					try:
 						lastBeat = getTimeSinceBeat(currentSong)
-
 					except IndexError as I:
 						c.hue += startingHueIncrement
 						currentSong.reSync()
@@ -342,21 +272,17 @@ while True:
 						print(type(T), T)
 
 					try:
-						# this ratio is the ratio of how far along in the beat we are, if its right before the next beat, it should be near 1, if we just had a beat, it should be near 0
-						# however, it is not a linear ratio, both the numerator and denominator are squared, making the value exponentially increase as we get closer to the next beat,
-						# making a pulse effect when we apply it to the value of the color
-						baseline = 0.5
-						ratio = (nextBeat, lastBeat) / (((nextBeat + lastBeat) / 2)) * (1 - baseline) + baseline
+						# this ratio is the ratio of how far along in the beat we are, if its right before the next beat
+						# it should be near 1. if we just had a beat, it should be near 0
+						ratio = (nextBeat) / ((nextBeat + lastBeat) / 2) * (1 - pulseBaseline) + pulseBaseline
 					except IndexError as I:
 						c.hue += startingHueIncrement
 						currentSong.reSync()
 						print(type(I), I)
-						break
 					except TypeError as T:
 						c.hue += startingHueIncrement
 						currentSong.reSync()
 						print(type(T), T)
-						next
 
 					# to get a pulsing effect, we apply the ratio calculated earlier to the value level of the color we've already assigned
 					c = setValue(c, max(min(ratio, 1), 0))
@@ -433,8 +359,7 @@ while True:
 							exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)) + exp_no_2_color_bounds[
 						                     0].hue
 					c = exp_no_2_color
-				elif patterns[
-					currentPattern] == 'rand_color_swirl':  # random color swirl, sometimes speeds up, sometimes slows down
+				elif patterns[currentPattern] == 'rand_color_swirl':  # random color swirl, sometimes speeds up, sometimes slows down
 					if c.hue < 0.998:
 						c.hue = c.hue + random.randint(-1, 5) / 10000
 					else:
