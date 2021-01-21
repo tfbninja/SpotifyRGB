@@ -164,6 +164,9 @@ def setValue(color, val):
     oldColor = colorsys.rgb_to_hsv(color.red, color.green, color.blue)
     out = Color(rgb=colorsys.hsv_to_rgb(oldColor[0], oldColor[1], val))
     return out
+def flushSerialBuffers():
+    ser.flushInput()
+    ser.flushOutput()
 
 # fair warning, I know that I'm using the term 'disco' wrong, it should be strobe, but by the time I wanted to change it, it was too late
 patterns = ['color_swirl', 'disco', 'beat_swirl', 'experiment_no_2', 'rand_color_swirl', 'disco_but_with_different_colors', 'super_fast_disco_and_also_random_colors_because_i_said', 'gentle_pulse', 'time_signature_pulse', '2_color_oscillation']
@@ -322,7 +325,7 @@ while(True):
                         c.hue += startingHueIncrement
                         currentSong.reSync()
                         print(type(T), T)
-                        break
+                        next
 
                     # to get a pulsing effect, we apply the ratio calculated earlier to the value level of the color we've already assigned
                     c = setValue(c, max(min(ratio, 1), 0))
@@ -695,8 +698,7 @@ while(True):
 
     if loopIndice % 150 == 0:
         # the serial would bug out after a while if i didn't do this regularly
-        ser.flushInput()
-        ser.flushOutput()
+        flushSerialBuffers()
     if (loopIndice % syncPeriod == 0):
         # make sure we're still doing lights to the right song/beat
         currentSong.reSync()
