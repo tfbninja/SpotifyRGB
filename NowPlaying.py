@@ -1,6 +1,6 @@
 import time
 #import Threading #later
-#check
+#chec
 class NowPlaying:
     def __init__(self, sp):
         self.sp = sp
