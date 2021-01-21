@@ -1,4 +1,5 @@
 import time
+#import Threading #later
 class NowPlaying:
     def __init__(self, sp):
         self.sp = sp
@@ -22,8 +23,8 @@ class NowPlaying:
                 self.beatlist = self.analysis['beats']
                 self.tatumlist = self.analysis['tatums']
                 
-                self.features = self.sp.audio_features(self.uri)
-                self.tempo = self.features[0]['tempo']
+                #self.features = self.sp.audio_features(self.uri)
+                #self.tempo = self.features[0]['tempo']
         except:
             print("song probably not playing")
 
@@ -64,8 +65,10 @@ class NowPlaying:
     def getSongName(self):
         return self.name
 
+    """
     def getTempo(self):
         return self.tempo
+    """
 
     def getSongLengthMillis(self):
         return self.songLength
