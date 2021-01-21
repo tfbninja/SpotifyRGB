@@ -23,9 +23,16 @@ class NowPlaying:
                 self.sectionlist = self.analysis['sections']
                 self.beatlist = self.analysis['beats']
                 self.tatumlist = self.analysis['tatums']
-                
-                #self.features = self.sp.audio_features(self.uri)
+
+                for i in range(len(self.sectionlist)):
+                    self.sectionlist[i]['start'] = round(self.sectionlist[i]['start'], 4)
+                for i in range(len(self.beatlist)):
+                    self.beatlist[i]['start'] = round(self.beatlist[i]['start'], 4)
+                for i in range(len(self.tatumlist)):
+                    self.tatumlist[i]['start'] = round(self.tatumlist[i]['start'], 4)
+                self.features = self.sp.audio_features(self.uri)
                 #self.tempo = self.features[0]['tempo']
+                self.time_signature = self.features[0]['time_signature']
         except:
             print("song probably not playing")
 
@@ -71,6 +78,9 @@ class NowPlaying:
         return self.tempo
     """
 
+    def getTimeSignature(self):
+        return self.time_signature
+
     def getSongLengthMillis(self):
         return self.songLength
 
@@ -79,4 +89,7 @@ class NowPlaying:
             return self.isPlaying
         except:
             return False
+        
+    def roundTo4(number):
+        return round(number, 4)
 
