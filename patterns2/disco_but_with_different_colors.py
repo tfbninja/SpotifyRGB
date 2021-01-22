@@ -19,7 +19,7 @@ class disco_but_with_different_colors(pattern):
 		self.current_hue = 0
 		self.color = self.hues[self.current_hue]
 		self.last_disco_beat = 0
-		self.disco_bar = 0.050  # in seconds (50 millis)
+		self.disco_bar = 0.040  # in seconds (40 millis)
 
 	def iterate(self):
 

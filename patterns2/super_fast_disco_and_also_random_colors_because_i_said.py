@@ -17,7 +17,7 @@ class super_fast_disco_and_also_random_colors_because_i_said(pattern):
 		self.current_hue = 0
 		self.color = self.hues[self.current_hue]
 		self.last_disco_beat = 0
-		self.disco_bar = 0.050  # in seconds (50 millis)
+		self.disco_bar = 0.050  # in seconds (40 millis)
 
 	def iterate(self):
 		this_beat = self.current_song.getBeat()
@@ -32,8 +32,7 @@ class super_fast_disco_and_also_random_colors_because_i_said(pattern):
 
 		last_tatum = self.current_song.getSecondsSinceTatum()
 
-		disco_bar = self.disco_bar
-		if next_tatum <= disco_bar / 2 or last_tatum <= disco_bar / 2:
+		if next_tatum <= self.disco_bar / 2 or last_tatum <= self.disco_bar / 2:
 			self.color = self.setValue(self.color, 1)
 		else:
 			self.color = self.setValue(self.color, 0.01)

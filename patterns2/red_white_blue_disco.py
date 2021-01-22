@@ -20,7 +20,7 @@ class red_white_blue_disco(pattern):
 		self.current_hue = 0
 		self.color = self.hues[self.current_hue]
 		self.last_disco_beat = 0
-		self.disco_bar = 0.050  # in seconds (50 millis)
+		self.disco_bar = 0.040  # in seconds (40 millis)
 
 	def iterate(self):
 		this_beat = self.current_song.getBeat()
@@ -35,11 +35,10 @@ class red_white_blue_disco(pattern):
 
 		last_tatum = self.current_song.getSecondsSinceTatum()
 
-		disco_bar = self.disco_bar
-		if next_tatum <= disco_bar / 2 or last_tatum <= disco_bar / 2:
-			self.setValue(self.color, 1)
+		if (next_tatum <= self.disco_bar / 2) or (last_tatum <= self.disco_bar / 2):
+			self.color = self.setValue(self.color, 1)
 		else:
-			self.setValue(self.color, 0.01)
+			self.color = self.setValue(self.color, 0.01)
 
 	def getColor(self):
 		return self.color

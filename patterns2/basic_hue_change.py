@@ -15,7 +15,7 @@ class basic_hue_change(pattern):
 	# now_playing can be null, doesn't matter. only added so that all patterns have same init variables
 	def __init__(self, now_playing):
 		self.color = Color("Red")
-		self.hue_increment = 0.001
+		self.hue_increment = 0.0005
 
 	def iterate(self):
 		if self.color.hue < 1 - self.hue_increment:

@@ -149,9 +149,9 @@ class NowPlaying:
 		return round(num, 4)
 
 	def getSecondsToNextSection(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for sectionIndice in range(len(self.section_list) - 2, 0, -1):
 				if time_seconds > self.section_list[sectionIndice]['start']:
 					return self.section_list[sectionIndice + 1]['start'] - time_seconds
@@ -162,9 +162,9 @@ class NowPlaying:
 		raise Exception("Could not get seconds to next section.").with_traceback(tb)
 
 	def getSecondsSinceSection(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for sectionIndice in range(len(self.section_list) - 2, 0, -1):
 				if time_seconds > self.section_list[sectionIndice]['start']:
 					return time_seconds - self.section_list[sectionIndice]['start']
@@ -175,9 +175,9 @@ class NowPlaying:
 		raise Exception("Could not get seconds since section.").with_traceback(tb)
 
 	def getSection(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for sectionIndice in range(len(self.section_list) - 2, 0, -1):
 				if time_seconds > self.section_list[sectionIndice]['start']:
 					return sectionIndice
@@ -188,9 +188,9 @@ class NowPlaying:
 		raise Exception("Could not get section.").with_traceback(tb)
 
 	def getSecondsToNextBeat(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for beatIndice in range(len(self.beat_list) - 2, 0, -1):
 				if time_seconds > self.beat_list[beatIndice]['start']:
 					return self.beat_list[beatIndice + 1]['start'] - time_seconds
@@ -214,12 +214,12 @@ class NowPlaying:
 			tb = sys.exc_info()[2]
 			raise Exception("Could not get seconds to nth beat.").with_traceback(tb)
 		print("not enough beats to calculate nth")
-		return 1
+		return n
 
 	def getSecondsSinceBeat(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for beatIndice in range(len(self.beat_list) - 2, 0, -1):
 				if time_seconds > self.beat_list[beatIndice]['start']:
 					return time_seconds - self.beat_list[beatIndice]['start']
@@ -230,9 +230,9 @@ class NowPlaying:
 		raise Exception("Could not get seconds since beat.").with_traceback(tb)
 
 	def getBeat(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			if millis > millis / 2:
 				for beatIndice in range(len(self.beat_list) - 2, 0, -1):
 					if time_seconds > self.beat_list[beatIndice]['start']:
@@ -248,9 +248,9 @@ class NowPlaying:
 		raise Exception("Could not get beat.").with_traceback(tb)
 
 	def getSecondsToNextTatum(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for tatumIndice in range(len(self.tatum_list) - 2, 0, -1):
 				if time_seconds > self.tatum_list[tatumIndice]['start']:
 					return self.tatum_list[tatumIndice + 1]['start'] - time_seconds
@@ -277,9 +277,9 @@ class NowPlaying:
 		return 0.1
 
 	def getSecondsSinceTatum(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			for tatumIndice in range(len(self.tatum_list) - 2, 0, -1):
 				if time_seconds > self.tatum_list[tatumIndice]['start']:
 					return time_seconds - self.tatum_list[tatumIndice]['start']
@@ -290,9 +290,9 @@ class NowPlaying:
 		raise Exception("Could not get seconds since tatum.").with_traceback(tb)
 
 	def getTatum(self):
-		millis = self.getPosInSongMillis()
-		time_seconds = millis / 1000
 		for i in range(self.retry_attempts):
+			millis = self.getPosInSongMillis()
+			time_seconds = millis / 1000
 			if millis > self.getSongLengthMillis() / 2:
 				for tatumIndice in range(len(self.tatum_list) - 2, 0, -1):
 					if time_seconds > self.tatum_list[tatumIndice]['start']:
