@@ -1,23 +1,23 @@
 from colour import Color
-from SpotifyLiaison import getLoopLength
-import pattern
 
-def isDisco():
-	return False
-
-def utilizesRandom():
-	return False
-
-def getName():
-	return "beat_swirl"
+from patterns2.pattern import pattern
+#from SpotifyLiaison import getLoopLength
 
 class beat_swirl(pattern):
+
+	@staticmethod
+	def isDisco():
+		return False
+
+	@staticmethod
+	def getName():
+		return "beat_swirl"
 
 	def __init__(self, now_playing):
 		self.current_song = now_playing
 		self.starting_color = Color('#38e84c')
 		self.color = self.starting_color
-		self.pulse_baseline = 0.3
+		self.loop_time = 2
 
 	def iterate(self):
 		# Calculates time of one and a half beats in millis
@@ -26,9 +26,12 @@ class beat_swirl(pattern):
 
 		# calculates ratio of one loop time to one and a half
 		# beat time, all in millis
-		ratio = getLoopLength() / one_and_a_half_beat_time
+		#ratio = getLoopLength() / one_and_a_half_beat_time
+		ratio = self.loop_time / one_and_a_half_beat_time
 
-		self.color.hue += (ratio * 0.5) % 1
+		self.color.hue += min(max((ratio),0),0.1)
+		if self.color.hue > 1:
+			self.color.hue = 0
 
 	def getColor(self):
 		return self.color

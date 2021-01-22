@@ -1,17 +1,16 @@
 from colour import Color
-from SpotifyLiaison import setValue
-import pattern
 
-def isDisco():
-	return False
-
-def utilizesRandom():
-	return False
-
-def getName():
-	return "color_swirl"
+from patterns2.pattern import pattern
 
 class color_swirl(pattern):
+
+	@staticmethod
+	def isDisco():
+		return False
+
+	@staticmethod
+	def getName():
+		return "color_swirl"
 
 	def __init__(self, now_playing):
 		self.current_song = now_playing
@@ -33,7 +32,7 @@ class color_swirl(pattern):
 		ratio = nextBeat / ((nextBeat + lastBeat) / 2) * (1 - self.pulse_baseline) + self.pulse_baseline
 
 		# to get a pulsing effect, we apply the ratio calculated earlier to the value level of the color we've already assigned
-		self.color = setValue(self.color, max(min(ratio, 1), 0))
+		self.color = self.setValue(self.color, max(min(ratio, 1), 0))
 
 	def getColor(self):
 		return self.color

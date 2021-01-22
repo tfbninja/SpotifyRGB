@@ -1,4 +1,6 @@
+import patterns2
 from patterns2 import *
+from patterns2 import patternManager
 import colorsys  # see colour import for why i need to import TWO color libraries
 import random
 import time
@@ -87,21 +89,9 @@ def nextPattern(currentSong, currentPattern):
 	return newPattern
 """
 
-def getValue(color):
-	val = colorsys.rgb_to_hsv(color.red, color.green, color.blue)[2]
-	return val
-
-def setValue(color, val):
-	oldColor = colorsys.rgb_to_hsv(color.red, color.green, color.blue)
-	output = Color(rgb=colorsys.hsv_to_rgb(oldColor[0], oldColor[1], val))
-	return output
-
 def flushSerialBuffers():
 	ser.flushInput()
 	ser.flushOutput()
-
-def getDiscoBar():
-	return discoBar
 
 def getLoopLength():
 	return loopLength
@@ -113,6 +103,26 @@ def printStatusToUser(currentSong, pattern_manager):
 
 	time_signature = currentSong.getTimeSignature()
 	print("Time signature: " + str(time_signature))
+
+def nextRandomPattern(currentSong, pattern_manager):
+	pattern_manager.nextRandomPattern()
+	printStatusToUser(currentSong, pattern_manager)
+
+def nextPattern(pattern_manager, pattern_name):
+	pattern_manager.nextPattern(pattern_name)
+	printStatusToUser(current_song, pattern_manager)
+
+def reSync(current_song, loop_indice, last_sync_indice, sync_period):
+	if loop_indice - sync_period > last_sync_indice:
+		current_song.reSync()
+		return loop_indice
+	return last_sync_indice
+
+def hardReSync(current_song, loop_indice, last_hard_sync_indice, hard_sync_period):
+	if loop_indice - hard_sync_period > last_hard_sync_indice:
+		current_song.hardReSync()
+		return loop_indice
+	return last_hard_sync_indice
 
 # fair warning, I know that I'm using the term 'disco' wrong, it should be strobe, but by the time I wanted to change
 # it, it was too late
@@ -128,11 +138,14 @@ for i in range(len(patterns)):
 		nonDiscoPatterns.append([patterns[i], i])
 """
 
-syncPeriod = 250
-loopIndiceResetPeriod = 2000
-discoesPerSong = 2
-discoesDone = 0
-currentPattern = 0
+sync_period = 3000
+hard_sync_period = sync_period
+last_sync_indice = 0
+last_hard_sync_indice = 0
+strobes_per_song = 2
+strobes_done = 0
+current_pattern = 2
+current_pattern += 1 # because there's the regular one at the beginning
 
 
 """
@@ -175,11 +188,12 @@ sp = spotipy.Spotify(
 	                          scope="user-read-currently-playing"))
 # The currentSong object stores all the cached data about the song, including the beatlist, time signature,
 # danceability, and so forth
-currentSong = NowPlaying.NowPlaying(sp)
+current_song = NowPlaying.NowPlaying(sp)
 # add patterns from patterns folder somehow idk
-pattern_list = [] # FIXME
-pattern_manager = patternManager(currentSong, pattern_list, currentPattern, discoesPerSong, discoesDone) # FIXME too
-printStatusToUser(currentSong)
+pattern_list = [] # FIXME (maybe)
+pattern_manager = patternManager.patternManager(current_song, pattern_list, current_pattern, strobes_per_song,
+                                                strobes_done) #
+printStatusToUser(current_song, pattern_manager)
 
 """
 # This re-calculates the random variables for the patterns that utilize randomness
@@ -189,7 +203,8 @@ refreshRandoms()
 
 # This is an integer describing the section in the song that we last knew we were in, if the CURRENT section changes,
 # we know to change the pattern
-lastSection = getSection(currentSong)
+lastSection = current_song.getSection()
+lastURI = current_song.getURI()
 
 # This gets a list of all (i think) devices
 devices = [port.device for port in serial.tools.list_ports.comports()]
@@ -203,10 +218,10 @@ port = ports[0]
 ser = serial.Serial(port, 74880)
 
 # c is the variable we're using to store the color we're going to send over Serial to the Arduino
-c = startingColor
+c = pattern_manager.getPatternColor()
 
-# This is the indice for the loop that we are in, when it gets above loopIndiceResetPeriod, it resets to 0
-loopIndice = 0
+# This is the indice for the loop that we are in, when the song changes it resets to 0
+loop_indice = 0
 
 # This is the main loop, where all the pattern algorithms are run
 while True:
@@ -214,25 +229,39 @@ while True:
 	# We time the loop length, necessary for at least one pattern
 	loopStart = time.time()
 
-	if currentSong.isPlaying():
-		try:
-			# This checks if we're near the end of the song
-			if currentSong.getPosInSongMillis() >= currentSong.getSongLengthMillis() - 3005:  # 3000 for my crossfade level, -5 for caution
-				currentSong.reSync()
-				resetVariablesBecauseSongChanged()  # fairly self-explanatory, no? Thank you, I take great pride in that function name.
+	if current_song.isPlaying():
+		# This checks if we're near the end of the song
+		if current_song.getPosInSongMillis() >= current_song.getSongLengthMillis() - 3005:  # 3000 for my crossfade level, -5 for caution
+			last_sync_indice = last_hard_sync_indice = hardReSync(current_song, loop_indice, last_hard_sync_indice, hard_sync_period)
+			loop_indice = 0
 
-			# This checks if we are in the first 5000 milliseconds of the song, because we've still got to query Spotify for all the info, so we'll just do a simple color change for the time being
-			if currentSong.getPosInSongMillis() < 5000:
-				# change the hue slightly
-				c.hue += startingHueIncrement
-			else:
+			#resetVariablesBecauseSongChanged()  # fairly self-explanatory, no? Thank you, I take great pride in
+			# that function name.
+
+		# This checks if we are in the first 5000 milliseconds of the song, because we've still got to query Spotify for all the info, so we'll just do a simple color change for the time being
+		if current_song.getPosInSongMillis() < 5000:
+			# change the hue slightly
+			#c.hue += startingHueIncrement
+			pass
+		elif pattern_manager.getPatternName() == 'basic_hue_change':
+			nextRandomPattern(current_song, pattern_manager)
+		else:
+			# if we JUST changed sections, we want to update a few things
+			this_section = current_song.getSection()
+			if this_section != lastSection:
+				print("next section is in " + str(this_section)[:5] + "s")
+				lastSection = this_section
+				nextRandomPattern(current_song, pattern_manager)
+			"""
+			if patterns[currentPattern] == 'color_swirl':
+				if c.hue < 0.998:
+					c.hue = c.hue + 0.0005
+				else:
+					c.hue = 0
+
+				# please excuse my lack of knowledge of how to not repeat these numerous stupid try/except statments
 				try:
-					# if we JUST changed sections, we want to update a few things
-					if getSection(currentSong) != lastSection:
-						print("next section is in " + str(getTimeToNextSection(currentSong))[:5] + "s")
-						lastSection = getSection(currentSong)
-						refreshRandoms()
-						currentPattern = nextPattern(currentSong, currentPattern)
+					nextBeat = getTimeToNextBeat(currentSong)
 				except IndexError as I:
 					c.hue += startingHueIncrement
 					currentSong.reSync()
@@ -242,422 +271,399 @@ while True:
 					currentSong.reSync()
 					print(type(T), T)
 
-				if patterns[currentPattern] == 'color_swirl':
-					if c.hue < 0.998:
-						c.hue = c.hue + 0.0005
-					else:
-						c.hue = 0
+				try:
+					lastBeat = getTimeSinceBeat(currentSong)
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					# please excuse my lack of knowledge of how to not repeat these numerous stupid try/except statments
-					try:
-						nextBeat = getTimeToNextBeat(currentSong)
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				try:
+					# this ratio is the ratio of how far along in the beat we are, if its right before the next beat
+					# it should be near 1. if we just had a beat, it should be near 0
+					ratio = (nextBeat) / ((nextBeat + lastBeat) / 2) * (1 - pulseBaseline) + pulseBaseline
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					try:
-						lastBeat = getTimeSinceBeat(currentSong)
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				# to get a pulsing effect, we apply the ratio calculated earlier to the value level of the color we've already assigned
+				c = setValue(c, max(min(ratio, 1), 0))
+			elif patterns[currentPattern] == 'disco':
+				hues = [Color("Red"), Color("Blue"), Color("White")]
 
-					try:
-						# this ratio is the ratio of how far along in the beat we are, if its right before the next beat
-						# it should be near 1. if we just had a beat, it should be near 0
-						ratio = (nextBeat) / ((nextBeat + lastBeat) / 2) * (1 - pulseBaseline) + pulseBaseline
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
+					lastDiscoBeat = getBeat(currentSong)
+					currentHue += 1
+					if currentHue > len(hues) - 1:
+						currentHue = 0
+				c = hues[currentHue]
 
-					# to get a pulsing effect, we apply the ratio calculated earlier to the value level of the color we've already assigned
-					c = setValue(c, max(min(ratio, 1), 0))
-				elif patterns[currentPattern] == 'disco':
-					hues = [Color("Red"), Color("Blue"), Color("White")]
+				try:
+					nextTatum = getTimeToNextTatum(currentSong)
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
-						lastDiscoBeat = getBeat(currentSong)
-						currentHue += 1
-						if currentHue > len(hues) - 1:
-							currentHue = 0
-					c = hues[currentHue]
+				try:
+					lastTatum = getTimeSinceTatum(currentSong)
 
-					try:
-						nextTatum = getTimeToNextTatum(currentSong)
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					try:
-						lastTatum = getTimeSinceTatum(currentSong)
+				if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
+					c.red *= 1
+					c.green *= 1
+					c.blue *= 1
+				else:
+					c.red *= 0.01
+					c.green *= 0.01
+					c.blue *= 0.01
+			elif patterns[
+				currentPattern] == 'beat_swirl':  # don't ask me what this pattern calculates, all i know is that the color change seeems to be in time with the beat \_:)_/
+				oneAndAHalfBeatTime = (getTimeToNthBeat(currentSong, 4) - getTimeToNthBeat(currentSong,
+				                                                                           1)) / 2 * 1000  # Calculates time of one and a half beats in millis
+				ratio = (
+					        loopLength) / oneAndAHalfBeatTime  # calculates ratio of one loop time to one and a half beat time, all in millis
+				currentPolarColor.hue += (ratio * 0.5) % 1
+				c = currentPolarColor
+			elif patterns[currentPattern] == 'experiment_no_2':
 
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				try:
+					beatTime = getTimeToNthBeat(currentSong, 2) - getTimeToNthBeat(currentSong,
+					                                                               1)  # time between next beat and beat after that
 
-					if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
-						c.red *= 1
-						c.green *= 1
-						c.blue *= 1
-					else:
-						c.red *= 0.01
-						c.green *= 0.01
-						c.blue *= 0.01
-				elif patterns[
-					currentPattern] == 'beat_swirl':  # don't ask me what this pattern calculates, all i know is that the color change seeems to be in time with the beat \_:)_/
-					oneAndAHalfBeatTime = (getTimeToNthBeat(currentSong, 4) - getTimeToNthBeat(currentSong,
-					                                                                           1)) / 2 * 1000  # Calculates time of one and a half beats in millis
-					ratio = (
-						        loopLength) / oneAndAHalfBeatTime  # calculates ratio of one loop time to one and a half beat time, all in millis
-					currentPolarColor.hue += (ratio * 0.5) % 1
-					c = currentPolarColor
-				elif patterns[currentPattern] == 'experiment_no_2':
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					try:
-						beatTime = getTimeToNthBeat(currentSong, 2) - getTimeToNthBeat(currentSong,
-						                                                               1)  # time between next beat and beat after that
+				if exp_no_2_color.hue > exp_no_2_color_bounds[1].hue:
+					exp_no_2_ratio = 1 - (loopLength / (beatTime * 1000))
+				elif exp_no_2_color.hue < exp_no_2_color_bounds[0].hue:
+					exp_no_2_ratio = (loopLength / (beatTime * 1000))
 
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
+				exp_no_2_color.hue = (exp_no_2_ratio * (
+						exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)) + exp_no_2_color_bounds[
+					                     0].hue
+				c = exp_no_2_color
+			elif patterns[currentPattern] == 'rand_color_swirl':  # random color swirl, sometimes speeds up, sometimes slows down
+				if c.hue < 0.998:
+					c.hue = c.hue + random.randint(-1, 5) / 10000
+				else:
+					c.hue = 0
 
-					if exp_no_2_color.hue > exp_no_2_color_bounds[1].hue:
-						exp_no_2_ratio = 1 - (loopLength / (beatTime * 1000))
-					elif exp_no_2_color.hue < exp_no_2_color_bounds[0].hue:
-						exp_no_2_ratio = (loopLength / (beatTime * 1000))
+				try:
+					nextBeat = getTimeToNextBeat(currentSong)
 
-					exp_no_2_color.hue = (exp_no_2_ratio * (
-							exp_no_2_color_bounds[0].hue - exp_no_2_color_bounds[1].hue)) + exp_no_2_color_bounds[
-						                     0].hue
-					c = exp_no_2_color
-				elif patterns[currentPattern] == 'rand_color_swirl':  # random color swirl, sometimes speeds up, sometimes slows down
-					if c.hue < 0.998:
-						c.hue = c.hue + random.randint(-1, 5) / 10000
-					else:
-						c.hue = 0
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					try:
-						nextBeat = getTimeToNextBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						lastBeat = getTimeSinceBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						ratio = (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					c = setValue(c, min(ratio + 0.05, 1))
-				elif patterns[
-					currentPattern] == 'disco_but_with_different_colors':  # its like the disco function but not just red/white/blue
-					discoColorHues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
-
-					if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
-						lastDiscoBeat = getBeat(currentSong)
-						currentHue += 1
-						if currentHue > len(discoColorHues) - 1:
-							currentHue = 0
-					c = discoColorHues[currentHue]
-
-					try:
-						nextTatum = getTimeToNextTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						lastTatum = getTimeSinceTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					# basically we turn the lights on at full blast for discoBar length in seconds centered at the tatum's time
-					if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
-						c.red *= 1
-						c.green *= 1
-						c.blue *= 1
-					else:
-						c.red *= 0.01
-						c.green *= 0.01
-						c.blue *= 0.01
-				elif patterns[
-					currentPattern] == 'super_fast_disco_and_also_random_colors_because_i_said':  # its like the disco function but not just red white or blue
-					hues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
-
-					if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
-						lastDiscoBeat = getBeat(currentSong)
-						currentHue += 1
-						if currentHue > len(hues) - 1:
-							currentHue = 0
-					c = hues[currentHue]
-
-					try:
-						nextTatum = getTimeToNextTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						lastTatum = getTimeSinceTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
-						c.red *= 1
-						c.green *= 1
-						c.blue *= 1
-					else:
-						c.red *= 0.01
-						c.green *= 0.01
-						c.blue *= 0.01
-				elif patterns[currentPattern] == 'gentle_pulse':
-					if c.hue < 0.998:
-						c.hue = c.hue + 0.0005
-					else:
-						c.hue = 0
-
-					try:
-						nextBeat = getTimeToNextBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						lastBeat = getTimeSinceBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						ratio = (0.2 * ((nextBeat) / (nextBeat + lastBeat))) ** 0.8
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					c = setValue(c, ratio)
-				elif patterns[currentPattern] == 'time_signature_pulse':
-					if time_signature_indice == time_signature:
-						time_signature_indice = 0
-						time_signature_pulse_color.hue += time_signature_pulse_hue_add
-						time_signature_pulse_color.hue = time_signature_pulse_color.hue % 1
-					c = Color(time_signature_pulse_color)
-
-					try:
-						nextTatum = getTimeToNextTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						lastTatum = getTimeSinceTatum(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					try:
-						ratio = (nextTatum ** 2) / (nextTatum + lastTatum ** 2)
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
-					if getTatum(currentSong) > time_signature_last_tatum_no:
-						time_signature_last_tatum_no = getTatum(currentSong)
-						time_signature_indice += 1
-
-					c = setValue(c, ratio + 0.05)
-				elif patterns[currentPattern] == '2_color_oscillation':
-
-					try:
-						thisBeat = getBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						currentSong.reSync()
-						c.hue += startingHueIncrement
-						print(type(T), T)
-
-					if thisBeat > lastOscillationBeat:
-						lastOscillationBeat = thisBeat
-						oscillation_first_color = not oscillation_first_color
-
-					try:
-						nextBeat = getTimeToNextBeat(currentSong)
-
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-
+				try:
 					lastBeat = getTimeSinceBeat(currentSong)
 
-					try:
-						lum_ratio = min(max((nextBeat ** 2) / ((nextBeat + lastBeat) ** 2) / 2, 0), 1)
-						color_ratio = lum_ratio  # nextBeat / ((lastBeat + nextBeat) / 2)
-						if color_ratio > 0.5:
-							color_ratio = 1 - ((1 - color_ratio) ** 2)
-						else:
-							color_ratio = color_ratio ** 2
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
 
-					except IndexError as I:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(I), I)
-					except TypeError as T:
-						c.hue += startingHueIncrement
-						currentSong.reSync()
-						print(type(T), T)
-					if oscillation_first_color:
-						c.red = (color_ratio * oscillation_colors[0].red) + (
-								(1 - color_ratio) * oscillation_colors[1].red)
-						c.green = (color_ratio * oscillation_colors[0].green) + (
-								(1 - color_ratio) * oscillation_colors[1].green)
-						c.blue = (color_ratio * oscillation_colors[0].blue) + (
-								(1 - color_ratio) * oscillation_colors[1].blue)
-					else:
-						c.red = ((1 - color_ratio) * oscillation_colors[0].red) + (
-								color_ratio * oscillation_colors[1].red)
-						c.green = ((1 - color_ratio) * oscillation_colors[0].green) + (
-								color_ratio * oscillation_colors[1].green)
-						c.blue = ((1 - color_ratio) * oscillation_colors[0].blue) + (
-								color_ratio * oscillation_colors[1].blue)
+				try:
+					ratio = (nextBeat ** 2) / (nextBeat + lastBeat ** 2)
 
-					c = setValue(c, max(0, min(lum_ratio + 0.05, 1)))
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				c = setValue(c, min(ratio + 0.05, 1))
+			elif patterns[
+				currentPattern] == 'disco_but_with_different_colors':  # its like the disco function but not just red/white/blue
+				discoColorHues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
+
+				if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
+					lastDiscoBeat = getBeat(currentSong)
+					currentHue += 1
+					if currentHue > len(discoColorHues) - 1:
+						currentHue = 0
+				c = discoColorHues[currentHue]
+
+				try:
+					nextTatum = getTimeToNextTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					lastTatum = getTimeSinceTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				# basically we turn the lights on at full blast for discoBar length in seconds centered at the tatum's time
+				if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
+					c.red *= 1
+					c.green *= 1
+					c.blue *= 1
 				else:
-					print("unknown pattern \"" + str(
-						currentPattern) + "\"")  # haven't had this happen yet but i figured a big if like this should have an else
+					c.red *= 0.01
+					c.green *= 0.01
+					c.blue *= 0.01
+			elif patterns[
+				currentPattern] == 'super_fast_disco_and_also_random_colors_because_i_said':  # its like the disco function but not just red white or blue
+				hues = [Color('#4ec7c1'), Color('#8715a3'), Color('#d6a727'), Color('#8a0615')]
 
-		except IndexError as I:
-			c.hue += startingHueIncrement
-			currentSong.reSync()
-			print(type(I), I)
-		except TypeError as T:
-			c.hue += startingHueIncrement
-			currentSong.reSync()
-			print(type(T), T)
+				if getBeat(currentSong) > lastDiscoBeat + 1:  # change hues every other beat
+					lastDiscoBeat = getBeat(currentSong)
+					currentHue += 1
+					if currentHue > len(hues) - 1:
+						currentHue = 0
+				c = hues[currentHue]
+
+				try:
+					nextTatum = getTimeToNextTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					lastTatum = getTimeSinceTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				if nextTatum <= discoBar / 2 or lastTatum <= discoBar / 2:
+					c.red *= 1
+					c.green *= 1
+					c.blue *= 1
+				else:
+					c.red *= 0.01
+					c.green *= 0.01
+					c.blue *= 0.01
+			elif patterns[currentPattern] == 'gentle_pulse':
+				if c.hue < 0.998:
+					c.hue = c.hue + 0.0005
+				else:
+					c.hue = 0
+
+				try:
+					nextBeat = getTimeToNextBeat(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					lastBeat = getTimeSinceBeat(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					ratio = (0.2 * ((nextBeat) / (nextBeat + lastBeat))) ** 0.8
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				c = setValue(c, ratio)
+			elif patterns[currentPattern] == 'time_signature_pulse':
+				if time_signature_indice == time_signature:
+					time_signature_indice = 0
+					time_signature_pulse_color.hue += time_signature_pulse_hue_add
+					time_signature_pulse_color.hue = time_signature_pulse_color.hue % 1
+				c = Color(time_signature_pulse_color)
+
+				try:
+					nextTatum = getTimeToNextTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					lastTatum = getTimeSinceTatum(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				try:
+					ratio = (nextTatum ** 2) / (nextTatum + lastTatum ** 2)
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				if getTatum(currentSong) > time_signature_last_tatum_no:
+					time_signature_last_tatum_no = getTatum(currentSong)
+					time_signature_indice += 1
+
+				c = setValue(c, ratio + 0.05)
+			elif patterns[currentPattern] == '2_color_oscillation':
+
+				try:
+					thisBeat = getBeat(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					currentSong.reSync()
+					c.hue += startingHueIncrement
+					print(type(T), T)
+
+				if thisBeat > lastOscillationBeat:
+					lastOscillationBeat = thisBeat
+					oscillation_first_color = not oscillation_first_color
+
+				try:
+					nextBeat = getTimeToNextBeat(currentSong)
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+
+				lastBeat = getTimeSinceBeat(currentSong)
+
+				try:
+					lum_ratio = min(max((nextBeat ** 2) / ((nextBeat + lastBeat) ** 2) / 2, 0), 1)
+					color_ratio = lum_ratio  # nextBeat / ((lastBeat + nextBeat) / 2)
+					if color_ratio > 0.5:
+						color_ratio = 1 - ((1 - color_ratio) ** 2)
+					else:
+						color_ratio = color_ratio ** 2
+
+				except IndexError as I:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(I), I)
+				except TypeError as T:
+					c.hue += startingHueIncrement
+					currentSong.reSync()
+					print(type(T), T)
+				if oscillation_first_color:
+					c.red = (color_ratio * oscillation_colors[0].red) + (
+							(1 - color_ratio) * oscillation_colors[1].red)
+					c.green = (color_ratio * oscillation_colors[0].green) + (
+							(1 - color_ratio) * oscillation_colors[1].green)
+					c.blue = (color_ratio * oscillation_colors[0].blue) + (
+							(1 - color_ratio) * oscillation_colors[1].blue)
+				else:
+					c.red = ((1 - color_ratio) * oscillation_colors[0].red) + (
+							color_ratio * oscillation_colors[1].red)
+					c.green = ((1 - color_ratio) * oscillation_colors[0].green) + (
+							color_ratio * oscillation_colors[1].green)
+					c.blue = ((1 - color_ratio) * oscillation_colors[0].blue) + (
+							color_ratio * oscillation_colors[1].blue)
+
+				c = setValue(c, max(0, min(lum_ratio + 0.05, 1)))
+			else:
+				print("unknown pattern \"" + str(
+					currentPattern) + "\"")  # haven't had this happen yet but i figured a big if like this should have an else
+			"""
+			pattern_manager.iteratePatternColor()
 	else:
-		c.hue += startingHueIncrement
-		print(c)
+		#c.hue += startingHueIncrement
+		#print(c)
+		pass
+	c = pattern_manager.getPatternColor()
 	convertedRGB = [max(min(floor(c.red * 255), 255), 0), max(min(floor(c.green * 255), 255), 0),
 	                max(min(floor(c.blue * 255), 255), 0)]
 
@@ -669,14 +675,12 @@ while True:
 	ser.write(bytes(out, 'utf-8'))  # tell the arduino what color to display! format: '(RED, GREEN, BLUE)', where RED,
 	# GREEN, and BLUE are integers between 0 and 255
 
-	if loopIndice % 150 == 0:
+	if loop_indice % 150 == 0:
 		# the serial would bug out after a while if i didn't do this regularly
 		flushSerialBuffers()
-	if loopIndice % syncPeriod == 0:
+	if loop_indice - last_sync_indice > sync_period:
 		# make sure we're still doing lights to the right song/beat
-		currentSong.reSync()
-	if loopIndice % loopIndiceResetPeriod == 0:
-		loopIndice = 0
+		last_sync_indice = reSync(current_song, loop_indice, last_sync_indice, sync_period)
 
-	loopIndice += 1
+	loop_indice += 1
 	loopLength = (time.time() - loopStart) * 1000

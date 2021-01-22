@@ -5,10 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="362d5324-ba6b-4232-9a22-7d2465dd1e92" name="Default Changelist" comment="formatting (yay PyCharm!)">
-      <change afterPath="$PROJECT_DIR$/patterns/beat_swirl.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NowPlaying.py" beforeDir="false" afterPath="$PROJECT_DIR$/NowPlaying.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SpotifyLiaison.py" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifyLiaison.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/basic_hue_change.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/beat_swirl.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/color_swirl.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/disco_but_with_different_colors.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/experiment_no_2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/gentle_pulse.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/pattern.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/patternManager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/rand_color_swirl.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/red_white_blue_disco.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/super_fast_disco_and_also_random_colors_because_i_said.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/time_signature_pulse.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns/two_color_oscillation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/basic_hue_change.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/basic_hue_change.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/beat_swirl.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/beat_swirl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/color_swirl.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/color_swirl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/disco_but_with_different_colors.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/disco_but_with_different_colors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/experiment_no_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/experiment_no_2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/gentle_pulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/gentle_pulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/pattern.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/pattern.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/patternManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/patternManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/rand_color_swirl.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/rand_color_swirl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/red_white_blue_disco.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/red_white_blue_disco.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/super_fast_disco_and_also_random_colors_because_i_said.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/super_fast_disco_and_also_random_colors_because_i_said.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/two_color_oscillation.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/two_color_oscillation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

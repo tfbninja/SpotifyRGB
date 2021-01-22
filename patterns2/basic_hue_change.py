@@ -1,18 +1,19 @@
 from colour import Color
-import pattern
 
-def isDisco():
-	return False
-
-def utilizesRandom():
-	return False
-
-def getName():
-	return "basic_hue_change"
+from patterns2.pattern import pattern
 
 class basic_hue_change(pattern):
 
-	def __init__(self):
+	@staticmethod
+	def isDisco():
+		return False
+
+	@staticmethod
+	def getName():
+		return "basic_hue_change"
+
+	# now_playing can be null, doesn't matter. only added so that all patterns have same init variables
+	def __init__(self, now_playing):
 		self.color = Color("Red")
 		self.hue_increment = 0.001
 

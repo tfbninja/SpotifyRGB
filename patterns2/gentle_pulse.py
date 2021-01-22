@@ -1,17 +1,17 @@
 from colour import Color
-from SpotifyLiaison import setValue
-import pattern
 
-def isDisco():
-	return False
+from patterns2.pattern import pattern
 
-def utilizesRandom():
-	return False
-
-def getName():
-	return "gentle_pulse"
 
 class gentle_pulse(pattern):
+
+	@staticmethod
+	def isDisco():
+		return False
+
+	@staticmethod
+	def getName():
+		return "gentle_pulse"
 
 	def __init__(self, now_playing):
 		self.current_song = now_playing
@@ -29,7 +29,7 @@ class gentle_pulse(pattern):
 
 		ratio = (0.2 * (next_beat / (next_beat + last_beat))) ** 0.8
 
-		self.color = setValue(self.color, ratio)
+		self.color = self.setValue(self.color, ratio)
 
 	def getColor(self):
 		return self.color

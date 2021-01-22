@@ -1,24 +1,26 @@
 from colour import Color
-from SpotifyLiaison import setValue, getDiscoBar
-import pattern
 
-def isDisco():
-	return True
+from patterns2.pattern import pattern
+#from SpotifyLiaison import setValue, getDiscoBar
 
-def utilizesRandom():
-	return False
-
-def getName():
-	return "red_white_blue_disco"
 
 class red_white_blue_disco(pattern):
+
+	@staticmethod
+	def isDisco():
+		return True
+
+	@staticmethod
+	def getName():
+		return "red_white_blue_disco"
 
 	def __init__(self, now_playing):
 		self.current_song = now_playing
 		self.hues = [Color("Red"), Color("Blue"), Color("White")]
-		self.current_hue = self.hues[0]
-		self.color = self.current_hue
+		self.current_hue = 0
+		self.color = self.hues[self.current_hue]
 		self.last_disco_beat = 0
+		self.disco_bar = 0.050  # in seconds (50 millis)
 
 	def iterate(self):
 		this_beat = self.current_song.getBeat()
@@ -33,16 +35,16 @@ class red_white_blue_disco(pattern):
 
 		last_tatum = self.current_song.getSecondsSinceTatum()
 
-		disco_bar = getDiscoBar()
+		disco_bar = self.disco_bar
 		if next_tatum <= disco_bar / 2 or last_tatum <= disco_bar / 2:
-			setValue(self.color, 1)
+			self.setValue(self.color, 1)
 		else:
-			setValue(self.color, 0.01)
+			self.setValue(self.color, 0.01)
 
 	def getColor(self):
 		return self.color
 
 	def processSongChange(self):
-		self.current_hue = self.hues[0]
+		self.current_hue = 0
 		self.color = self.current_hue
 		self.last_disco_beat = 0

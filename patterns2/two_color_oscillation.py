@@ -1,22 +1,20 @@
 from colour import Color
 
-import pattern
-from SpotifyLiaison import setValue
-
-def isDisco():
-	return False
-
-def utilizesRandom():
-	return False
-
-def getName():
-	return "two_color_oscillation"
+from patterns2.pattern import pattern
 
 class two_color_oscillation(pattern):
 
+	@staticmethod
+	def isDisco():
+		return False
+
+	@staticmethod
+	def getName():
+		return "two_color_oscillation"
+
 	def __init__(self, now_playing):
 		self.current_song = now_playing
-		self.oscillation_colors = [Color('#34ebcf'), Color('#d66f1c')]
+		self.oscillation_colors = [Color('#34ebcf'), Color('#b36909')]
 		self.first_color = True
 		if self.first_color:
 			self.color = self.oscillation_colors[0]
@@ -59,7 +57,7 @@ class two_color_oscillation(pattern):
 			self.color.blue = ((1 - color_ratio) * self.oscillation_colors[0].blue) + (
 					color_ratio * self.oscillation_colors[1].blue)
 
-		self.color = setValue(self.color, max(0, min(lum_ratio + 0.05, 1)))
+		self.color = self.setValue(self.color, max(0, min(lum_ratio + 0.05, 1)))
 
 	def getColor(self):
 		return self.color
