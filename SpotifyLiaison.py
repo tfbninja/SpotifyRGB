@@ -10,6 +10,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import NowPlaying
 from credentials import *
 from patterns2 import patternManager
+import RemoteManager
 
 def printDelta(start, message):
 	print(str(time.time() - start) + "   " + message)
@@ -78,7 +79,7 @@ last_sync_indice = 0
 last_hard_sync_indice = 0
 strobes_per_song = 2
 strobes_done = 0
-current_pattern = 0
+current_pattern = 11
 
 loopLength = 0.001
 
@@ -111,6 +112,7 @@ if len(ports) != 1:
 port = ports[0]
 ser = serial.Serial(port, 74880)
 flushSerialBuffers()
+rm = RemoteManager(ser)
 
 # c is the variable we're using to store the color we're going to send over Serial to the Arduino
 c = Color("Blue")
