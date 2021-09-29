@@ -7,9 +7,9 @@ from math import floor
 class NowPlaying:
 	def __init__(self, sp):
 		self.sp = sp
-		self.retry_attempts = 10
-		self.retry_wait_time_millis = 2000
-		self.resync_indice = 0
+		self.retry_attempts = 3
+		self.retry_wait_time_millis = 250
+		self.resync_index = 0
 		self.results = self.sp.current_user_playing_track()
 
 		self.is_playing = self.results['is_playing']
@@ -37,8 +37,8 @@ class NowPlaying:
 			self.time_signature = self.features[0]['time_signature']
 
 	def reSync(self):
-		print("re-syncing " + str(self.resync_indice))
-		self.resync_indice += 1
+		print("re-syncing " + str(self.resync_index))
+		self.resync_index += 1
 		tempResults = self.sp.current_user_playing_track()
 		self.is_playing = tempResults['is_playing']
 		if self.is_playing:
@@ -78,11 +78,13 @@ class NowPlaying:
 			return True
 
 	def hardReSync(self):
-		print("hard re-syncing " + str(self.resync_indice))
-		self.resync_indice += 1
+		print("hard re-syncing " + str(self.resync_index))
+		self.resync_index += 1
 		tempResults = self.sp.current_user_playing_track()
 		self.is_playing = tempResults['is_playing']
-		self.results = self.sp.current_user_playing_track()
+
+		#self.results = self.sp.current_user_playing_track()
+		self.results = tempResults
 
 		self.is_playing = self.results['is_playing']
 		self.progress_ms = self.results['progress_ms']
@@ -106,7 +108,7 @@ class NowPlaying:
 		self.features = self.sp.audio_features(self.uri)
 		# self.tempo = self.features[0]['tempo']
 		self.time_signature = self.features[0]['time_signature']
-		print("hard sync successful")
+		print("hard sync successful, song name: " + self.name)
 		return True
 
 	def getSectionList(self):
@@ -178,10 +180,11 @@ class NowPlaying:
 		for i in range(self.retry_attempts):
 			millis = self.getPosInSongMillis()
 			time_seconds = millis / 1000
-			for sectionIndice in range(len(self.section_list) - 2, 0, -1):
-				if time_seconds > self.section_list[sectionIndice]['start']:
-					return sectionIndice
+			for sectionIndex in range(len(self.section_list) - 2, 0, -1):
+				if time_seconds > self.section_list[sectionIndex]['start']:
+					return sectionIndex
 			self.timeoutSleep(i)
+			print("Retrying Section")
 			self.reSync()
 		self.hardReSync()
 		tb = sys.exc_info()[2]
@@ -309,6 +312,5 @@ class NowPlaying:
 
 	def timeoutSleep(self, iteration):
 		for i in range(floor(self.retry_wait_time_millis * (1.2 * iteration))):
-			for j in range(self.retry_wait_time_millis):
-				time.sleep(0.001)
+			time.sleep(0.001)
 		return

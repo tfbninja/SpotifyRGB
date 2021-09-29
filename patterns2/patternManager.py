@@ -2,6 +2,7 @@ import random
 
 import patterns2
 
+
 class patternManager:
 
 	def dynamicImportClassFromPatterns2(self, class_name):
@@ -23,7 +24,7 @@ class patternManager:
 			# also have to assign self.pattern_list
 			print("No patterns specified, importing all: " + str(patterns2.__all__))
 			for pattern_name in patterns2.__all__:
-				pattern = self.dynamicImportClassFromPatterns2(pattern_name) # take a look at this function :)
+				pattern = self.dynamicImportClassFromPatterns2(pattern_name)  # take a look at this function :)
 				self.pattern_list.append(pattern(self.current_song))
 				self.pattern_names_list.append(pattern.getName())
 				if not pattern.isDisco():
@@ -38,7 +39,7 @@ class patternManager:
 					self.non_disco_patterns.append(pattern)
 
 		print("successfully imported the following patterns: " + str(self.pattern_list))
-		self.current_pattern = self.pattern_list[start_pattern]#(self.current_song)
+		self.current_pattern = self.pattern_list[start_pattern]  # (self.current_song)
 		self.discos_per_song = discos_per_song
 		self.discos_done = discos_done
 
@@ -61,12 +62,15 @@ class patternManager:
 			valid_choices.pop(self.pattern_names_list.index(self.current_pattern.getName()))
 		else:
 			valid_choices = self.non_disco_patterns
-		self.current_pattern = self.pattern_list[random.choice(valid_choices)]#(self.current_song)
+		self.current_pattern = self.pattern_list[random.choice(valid_choices)]  # (self.current_song)
 
 	def nextPattern(self, pattern_n):
-		#don't restart the pattern if it's the same
+		# don't restart the pattern if it's the same
 		if self.pattern_list[self.pattern_names_list.index(pattern_n)].getName() != self.current_pattern.getName():
 			self.current_pattern = self.pattern_list[self.pattern_names_list.index(pattern_n)]
+			return True
+		else:
+			return False
 
 	def processSongChange(self):
 		self.discos_done = 0

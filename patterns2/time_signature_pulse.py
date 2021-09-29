@@ -16,13 +16,13 @@ class time_signature_pulse(pattern):
 		self.current_song = now_playing
 		self.color = Color("#44f25b")
 		self.hue_add = 0.31
-		self.indice = self.current_song.getBeat() % 4
+		self.index = self.current_song.getBeat() % 4
 		self.last_tatum_no = 0
 		self.time_signature = now_playing.getTimeSignature()
 
 	def iterate(self):
-		if self.indice == self.time_signature:
-			self.indice = 0
+		if self.index == self.time_signature:
+			self.index = 0
 			self.color.hue += self.hue_add
 			self.color.hue = self.color.hue % 1
 
@@ -35,7 +35,7 @@ class time_signature_pulse(pattern):
 		this_tatum = self.current_song.getTatum()
 		if this_tatum > self.last_tatum_no:
 			self.last_tatum_no = this_tatum
-			self.indice += 1
+			self.index += 1
 
 		self.color = self.setValue(self.color, max(min(ratio + 0.05, 1),0))
 
@@ -43,6 +43,6 @@ class time_signature_pulse(pattern):
 		return self.color
 
 	def processSongChange(self):
-		self.indice = self.current_song.getBeat() % 4
+		self.index = self.current_song.getBeat() % 4
 		self.last_tatum_no = 0
 		self.time_signature = self.current_song.getTimeSignature()

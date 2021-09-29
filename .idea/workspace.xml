@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="362d5324-ba6b-4232-9a22-7d2465dd1e92" name="Default Changelist" comment="formatting (yay PyCharm!)">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RemoteManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/RemoteManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NowPlaying.py" beforeDir="false" afterPath="$PROJECT_DIR$/NowPlaying.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SpotifyLiaison.py" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifyLiaison.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/color_swirl.ino" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/pyvenv.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/venv/pyvenv.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/patternManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/patternManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
