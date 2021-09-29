@@ -2,9 +2,9 @@
 // in the #defines
 // public domain, enjoy!
 
-#define REDPIN 9
-#define GREENPIN 10
-#define BLUEPIN 11
+#define REDPIN 5
+#define GREENPIN 6
+#define BLUEPIN 3
 
 #define FADESPEED 2     // make this higher to slow down
 
@@ -20,7 +20,7 @@ void setup() {
   pinMode(REDPIN, OUTPUT);
   pinMode(GREENPIN, OUTPUT);
   pinMode(BLUEPIN, OUTPUT);
-  Serial.begin(74880);
+  Serial.begin(57600);
   r = 255;
   g = 255;
   b = 255;
@@ -53,7 +53,7 @@ void loop() {
       g = min(max(RGBConverted[1], 0), 255);
       b = min(max(RGBConverted[2], 0), 255);
       //Serial.println("(" + String(RGBConverted[0]) + ", " + String(RGBConverted[1]) + ", " + String(RGBConverted[2]) + ")");
-      Serial.println("r:" + String(r) + ", g:" + String(g) + ", b:" + String(b));
+      //Serial.println("r:" + String(r) + ", g:" + String(g) + ", b:" + String(b));
     } else if (incomingByte == 44) {
       RGBReceiving = RGBReceiving + 1;
       //Serial.println("incremented " + String(RGBReceiving));
