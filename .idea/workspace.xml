@@ -8,8 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NowPlaying.py" beforeDir="false" afterPath="$PROJECT_DIR$/NowPlaying.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SpotifyLiaison.py" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifyLiaison.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/patterns2/patternManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/patternManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/time_signature_pulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patterns2/beat_swirl.py" beforeDir="false" afterPath="$PROJECT_DIR$/patterns2/beat_swirl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +37,9 @@
       </set>
     </option>
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedIndex" value="1" />
+  </component>
   <component name="ProjectId" id="1nO2MTDXvk7Jd22y9ggmhZKLhwY" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -51,7 +53,7 @@
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/patterns2" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.tabs" />
   </component>
   <component name="PyConsoleOptionsProvider">
@@ -64,9 +66,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\Documents\GitHub\SpotifyRGB\patterns2" />
       <recent name="C:\SpotifyRGB\patterns2" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\user\Documents\GitHub\SpotifyRGB\patterns2\unfinished" />
       <recent name="C:\SpotifyRGB" />
       <recent name="C:\SpotifyRGB\patterns" />
     </key>

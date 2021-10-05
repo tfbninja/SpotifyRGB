@@ -30,8 +30,8 @@ def randomishColor():
     return outColor
 
 
-def randomishColorSeed(seed):
-    random_obj = random.random(seed)
+def randomishColorSeed():
+    random_obj = random.random()
     total = random_obj.randint(0, 255 * 3)
     random1 = random_obj.randint(0, min(255, total))
     random2 = random_obj.randint(0, min(255, total - random1))
@@ -71,28 +71,27 @@ def nextPattern(patternManagerObj, pattern_name):
         printStatusToUser(current_song, patternManagerObj)
 
 
-def reSync(currentSong, loopIndex, lastSyncIndex, syncPeriod):
-    if loopIndex - syncPeriod > lastSyncIndex:
+def reSync(currentSong, lastSyncTime, syncPeriod):
+    if time.time() - lastSyncTime > syncPeriod:
         currentSong.reSync()
-        return loopIndex
-    return lastSyncIndex
+        return time.time()
+    return lastSyncTime
 
 
-def hardReSync(currentSong, loopIndex, lastHardSyncIndex, hardSyncPeriod):
+def hardReSync(currentSong):
     # if loopIndex - hardSyncPeriod > lastHardSyncIndex:
-    print("Going to hard resync")
+    print("Going to hard re-sync")
     currentSong.hardReSync()
-    return loopIndex
     # return lastHardSyncIndex
 
 
-sync_period = 2000
+sync_period = 10  # seconds
 hard_sync_period = sync_period * 1.5
-last_sync_index = 0
-last_hard_sync_index = 0
+last_sync_time = time.time()
+last_hard_sync_time = time.time()
 strobes_per_song = 2
 strobes_done = 0
-current_pattern = 2
+current_pattern = 3
 
 loopLength = 0.001
 
@@ -146,24 +145,22 @@ while True:
             pattern_manager.processSongChange()
             nextPattern(pattern_manager, 'basic_hue_change')
             while current_song.getURI() == lastURI:
-                hardReSync(current_song, loop_index, last_hard_sync_index, hard_sync_period)
+                hardReSync(current_song)
             print(
-                "Song change detected in main loop, pos: " + str(current_song.getPosInSongMillis()) + " out of: " + str(current_song.getSongLengthMillis()))
-            last_sync_index = last_hard_sync_index = 0
+                "Song change detected in main loop, pos: " + str(current_song.getPosInSongMillis()) + " out of: " + str(
+                    current_song.getSongLengthMillis()))
+            last_sync_time = last_hard_sync_time = loopStart = time.time()
             lastURI = current_song.getURI()
             lastSection = 0
             loop_index = 1
             strobes_done = 0
-            loopStart = time.time()
             nextRandomPattern(current_song, pattern_manager)
             printStatusToUser(current_song, pattern_manager)
-            '''
-                    # This checks if we are in the first 5000 milliseconds of the song, because we've still got to query Spotify
-                    # for all the info, so we'll just do a simple color change for the time being
-                    elif current_song.getPosInSongMillis() < 5000:
-                        pattern_manager.nextPattern('basic_hue_change')
-                        printStatusToUser()
-            '''
+
+            '''# This checks if we are in the first 5000 milliseconds of the song, because we've still got to query 
+            Spotify # for all the info, so we'll just do a simple color change for the time being elif 
+            current_song.getPosInSongMillis() < 5000: pattern_manager.nextPattern('basic_hue_change') 
+            printStatusToUser() '''
         elif pattern_manager.getPatternName() == 'basic_hue_change':
             nextRandomPattern(current_song, pattern_manager)
         else:
@@ -190,13 +187,12 @@ while True:
     ser.write(bytes(out, 'utf-8'))  # tell the arduino what color to display. format: '(RED,GREEN,BLUE)', where RED,
     # GREEN, and BLUE are integers between 0 and 255
 
-    if loop_index % 2000 == 0:
+    if loop_index % 2500 == 0:
         # the serial would bug out after a while if i didn't do this regularly
         flushSerialBuffers()
-    if loop_index - last_sync_index > sync_period:
-        # make sure we're still doing lights to the right song/beat
-        last_sync_index = reSync(current_song, loop_index, last_sync_index, sync_period)
-        print("last sync index: " + str(last_sync_index))
+
+    # make sure we're still doing lights to the right song/beat
+    last_sync_time = reSync(current_song, last_sync_time, sync_period)
 
     loop_index += 1
     loopLength = (time.time() - loopStart) * 1000
