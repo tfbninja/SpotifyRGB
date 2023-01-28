@@ -91,7 +91,7 @@ last_sync_time = time.time()
 last_hard_sync_time = time.time()
 strobes_per_song = 2
 strobes_done = 0
-current_pattern = 3
+current_pattern = 8
 
 loopLength = 0.001
 
